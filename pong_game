@@ -1,0 +1,82 @@
+import pygame
+import sys
+
+# Constants
+WIDTH, HEIGHT = 800, 400
+WHITE = (255, 255, 255)
+BALL_COLOR = (255, 255, 0)
+PADDLE_COLOR = (0, 0, 255)
+
+# Initialize Pygame
+pygame.init()
+
+# Create the game window
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Pong Game")
+
+# Initialize variables
+ball_x, ball_y = WIDTH // 2, HEIGHT // 2
+ball_speed_x, ball_speed_y = 7, 7
+paddle1_x, paddle1_y = 20, HEIGHT // 2 - 50
+paddle2_x, paddle2_y = WIDTH - 30, HEIGHT // 2 - 50
+paddle_speed = 10
+score1, score2 = 0, 0
+
+# Main game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w] and paddle1_y > 0:
+        paddle1_y -= paddle_speed
+    if keys[pygame.K_s] and paddle1_y < HEIGHT - 100:
+        paddle1_y += paddle_speed
+    if keys[pygame.K_UP] and paddle2_y > 0:
+        paddle2_y -= paddle_speed
+    if keys[pygame.K_DOWN] and paddle2_y < HEIGHT - 100:
+        paddle2_y += paddle_speed
+
+    ball_x += ball_speed_x
+    ball_y += ball_speed_y
+
+    # Ball collisions
+    if ball_y <= 0 or ball_y >= HEIGHT - 10:
+        ball_speed_y = -ball_speed_y
+
+    if ball_x <= 0:
+        score2 += 1
+        ball_x, ball_y = WIDTH // 2, HEIGHT // 2
+        ball_speed_x = 7
+
+    if ball_x >= WIDTH - 10:
+        score1 += 1
+        ball_x, ball_y = WIDTH // 2, HEIGHT // 2
+        ball_speed_x = -7
+
+    if (
+        ball_x <= paddle1_x + 10
+        and paddle1_y <= ball_y <= paddle1_y + 100
+    ) or (
+        ball_x >= paddle2_x - 10
+        and paddle2_y <= ball_y <= paddle2_y + 100
+    ):
+        ball_speed_x = -ball_speed_x
+
+    # Draw everything
+    screen.fill(WHITE)
+    pygame.draw.rect(screen, PADDLE_COLOR, (paddle1_x, paddle1_y, 10, 100))
+    pygame.draw.rect(screen, PADDLE_COLOR, (paddle2_x, paddle2_y, 10, 100))
+    pygame.draw.ellipse(screen, BALL_COLOR, (ball_x, ball_y, 10, 10))
+
+    # Display scores
+    font = pygame.font.Font(None, 36)
+    score_display = font.render(
+        f"{score1} - {score2}", True, (0, 0, 0)
+    )
+    screen.blit(score_display, (WIDTH // 2 - 30, 10))
+
+    pygame.display.flip()
+    pygame.time.delay(50)
